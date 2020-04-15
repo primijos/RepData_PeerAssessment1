@@ -1,24 +1,85 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
+author: José Oliver Segura
 output: 
-  html_document:
-    keep_md: true
+html_document:
+keep_md: true
 ---
 
 
 ## Loading and preprocessing the data
+```{r output=F}
+options(digits=12)
+```
 
 
+Assuming **cwd** is set to the directory where data is located, we can load data directly from the zip file:
+
+```{r}
+content <- unz("activity.zip","activity.csv")
+dataset <- read.csv(content,stringsAsFactors = T)
+```
+
+We can check data is loaded and looks fine:
+```{r}
+head(dataset)
+```
+```{r}
+summary(dataset)
+```
 
 ## What is mean total number of steps taken per day?
 
+Since we have to respond some questions about total steps per day, we can create a dataset of aggregated data:
 
+```{r}
+agg.date <- aggregate(steps ~ date, dataset, sum)
+head(agg.date)
+```
+
+Next, we can plot the histogram of total steps per day:
+```{r}
+hist(agg.date$steps,breaks=10,xlab="steps",main="Total steps per day histogram",col="gray")
+```
+
+As demanded, we can find out the mean and the median for the total number of steps for each day:
+
+```{r}
+summary(agg.date$steps)
+```
+
+We can observe that the mean is `r sprintf("%.4f",mean(agg.date$steps))` and the median is `r sprintf("%d",median(agg.date$steps))`.
 
 ## What is the average daily activity pattern?
 
+Let's make a time series plot of the 5 minute interval and the average number of steps taken across all days. Since we need also to solve another questions, we can aggregate now by interval:
 
+```{r}
+agg.interval <- aggregate(steps ~ interval,dataset,mean)
+head(agg.interval)
+```
+
+Now we can plot the data:
+```{r}
+plot(agg.interval,type="l",main="Average steps per interval")
+```
+
+As can be seen in the plot, the 5-minute interval with the maximum number of steps (on average) is somewhere near the 1000th interval, we can find it exactly:
+
+```{r}
+index <- which.max(agg.interval$steps)
+agg.interval$interval[index]
+```
 
 ## Imputing missing values
+
+Let's find out how many missing values do we have:
+
+```{r}
+sapply(names(dataset),function(n) {sum(is.na(dataset[n]))})
+```
+
+Looks that the only column with missing values is "steps".
 
 
 
